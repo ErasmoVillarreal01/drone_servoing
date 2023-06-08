@@ -10,48 +10,35 @@ tl_flight = tl_drone.flight
 keepRecording = True
 epsilon = 10
 
-epsilon_trak = 20
-
-def track(pos):
-    if(pos < -epsilon_trak):
-        tl_flight.rc(a=-5,b=0,c=0,d=0)
-         
-        print("tracking left")
-    elif(pos > epsilon_trak):
-        tl_flight.rc(a=5,b=0,c=0,d=0)
-        print("tracking right") 
-    else:
-        tl_flight.rc(a=0,b=0,c=0,d=0) 
-        print("static")
-
-
-
+area = 0
 
 #CHECAR BIEN LA ORIENTACION Y LOS VALORES DE DIF_POS
 def follow_anomaly(dif_pos):
     if dif_pos > epsilon:
         tl_flight.rc(a=-10,b=0,c=0,d=0) #solo cambiamos roll para seguir el objeto
+        time.sleep(1)
     elif dif_pos < -epsilon:
         tl_flight.rc(a=10,b=0,c=0,d=0)
+        time.sleep(1)
     else:
         tl_flight.rc(a=0,b=0,c=0,d=0)
+        time.sleep(1)
 
 def choose_trajec(path):
-    if (path == "square"):
-        print("Initiating movement SQUARE")
-        tl_flight.rc(a=0,b=0,c=0,d=0)
-        time.sleep(20)
-    elif(path == "circle"):
-        print("Initiating movement CIRCLE")
-        tl_flight.rc(a=0,b=0,c=0,d=0)
-        time.sleep(20)
-        
-    else: 
-        print("not valid")
+    global area
+    while(area < 400):
+        print(path)
+        tl_flight.rc(a=20,b=20,c=0,d=50)
+        time.sleep(0.5)
+    print("SE DETIENE")
+    tl_flight.rc(a=0,b=0,c=0,d=0)
+    time.sleep(10)
+    follow_anomaly()
         
 
 
 def recordVideo():
+    global area
     print("Joining Camera")
     tl_camera = tl_drone.camera
     tl_camera.start_video_stream(display=False)
@@ -96,8 +83,10 @@ def recordVideo():
                     msg="3"
                 elif(diff_x>0 and diff_y<0):
                     msg="4"
- 
- 
+
+                follow_anomaly(diff_x)
+
+
                 nuevoContorno = cv2.convexHull(c)
                 # rospy.loginfo("{}, {}".format(cx,cy))
                 cv2.putText(result, '{},{}'.format(diff_x,diff_y), (cx+10,cy),cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,255,0),1,cv2.LINE_AA) # diff x y diff y
@@ -127,7 +116,8 @@ if __name__ == '__main__':
 
     # Set the QUAV to takeoff
     tl_flight.takeoff().wait_for_completed()
-    time.sleep(2)
+    input_square = "square"
+    choose_trajec(input_square)
     # Add a delay to remain in hover   
     # Set the QUAV to land
     tl_flight.land().wait_for_completed()
@@ -139,4 +129,3 @@ if __name__ == '__main__':
 
     
     cv2.destroyAllWindows()
-
