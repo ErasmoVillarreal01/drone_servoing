@@ -1,2 +1,1 @@
-https://www.dji.com/de/robomaster-t
-t
+https://www.dji.com/de/robomaster-tt
